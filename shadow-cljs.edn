@@ -1,0 +1,20 @@
+;; shadow-cljs configuration
+{:source-paths
+ [
+  "src/dev"
+  "src/main"
+  "src/test"]
+
+ :dependencies
+ [
+  [cljs-http "0.1.46"]
+  [day8.re-frame/http-fx "v0.2.0"]
+  [re-frame "0.12.0"]
+  [reagent "1.0.0-alpha1"]]
+
+
+ :dev-http {4500 "public"}
+
+ :builds
+ {:web {:target :browser
+        :modules {:main {:init-fn phrasing.core/init}}}}}
