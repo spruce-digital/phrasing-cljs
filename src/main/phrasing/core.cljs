@@ -3,23 +3,18 @@
             [reagent.dom :as dom]
             [re-frame.core :as rf]
             [phrasing.events :as event]
-            [phrasing.subs :as sub]))
+            [phrasing.subs :as sub]
+            [phrasing.router :refer [routes router]]
+            [kee-frame.core :as kee]
+            [re-frisk.core :as re-frisk]))
 
-(defn ui
-  []
-  (let [items @(rf/subscribe [::sub/items])
-        _ (println "items" items)]
-    [:div
-     [:h1 "These are your items"]
-     (for [item items]
-       ^{:key item} [:li "Name: " (item :name)])]))
+(re-frisk/enable)
 
-;; -- Entry Point -------------------------------------------------------------
-
-(defn render
-  []
-  (dom/render [ui]
-              (js/document.getElementById "root")))
+(defn start-app! []
+  (kee/start! {:routes         routes
+               :root-component [router]
+               ; :initial-db     {:foo :bar}
+               :debug?         true}))
 
 (defn ^:dev/after-load clear-cache-and-render!
   []
@@ -27,11 +22,5 @@
   ;; after shadow-cljs hot-reloads code. We force a UI update by clearing
   ;; the Reframe subscription cache.
   (rf/clear-subscription-cache!)
-  (render))
-
-(defn init
-  []
-  (rf/dispatch-sync [::event/initialize])
-  (rf/dispatch-sync [::event/gql-test])
-  (render))
+  (start-app!))
 

@@ -10,11 +10,13 @@
   [cljs-http "0.1.46"]
   [day8.re-frame/http-fx "v0.2.0"]
   [re-frame "0.12.0"]
-  [reagent "1.0.0-alpha1"]]
+  [reagent "0.10.0"]
+  [kee-frame "0.4.0"]
+  [re-frisk "1.3.0"]]
 
 
  :dev-http {4500 "public"}
 
  :builds
  {:web {:target :browser
-        :modules {:main {:init-fn phrasing.core/init}}}}}
+        :modules {:main {:init-fn phrasing.core/start-app!}}}}}
