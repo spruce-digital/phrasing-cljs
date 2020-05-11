@@ -1,6 +1,9 @@
 (ns phrasing.ui.css
   (:require [reagent.core]
-            [garden.core :refer [css]]))
+            [garden.core :refer [css]]
+            [clojure.walk :refer [walk]]))
+
+;; DOM Management -------------------------------------------------------------
 
 (defn insert-styles
   "Inserts Stylesheet into document head"
@@ -18,34 +21,74 @@
   (aset el "innerHTML" styles)
   (comment .appendChild el (.createTextNode js/document styles)))
 
-(defn kw->id [kw]
-  (-> kw str (subs 1)
-      (clojure.string/replace "." "-")
-      (clojure.string/replace "/" "--")))
-
-(defn render-stylesheet [styles id]
+(defn render-styles
+  "Creates or updates Stylesheet"
+  [styles id]
   (if-let [el (.getElementById js/document id)]
     (update-styles styles el)
     (insert-styles styles id)))
 
-(defn defstyle [kw & styles]
-  (let [id              (kw->id kw)
-        prefixed-styles (if (-> kw name (= "global"))
-                          styles
-                          (into [(str "." id)] styles))]
-     (render-stylesheet (css prefixed-styles) id)))
+;; Processors -----------------------------------------------------------------
 
-(defn style
-  ([kw] {:class (kw->id kw)})
-  ([kw opts] (update opts :class #(-> kw kw->id (str " " %)))))
-
-(def mixins {:flex-column {:display :flex
+(def snippets {:flex-column {:display :flex
                            :flex-direction :column
                            :flex 1}})
 
-(defn get-mixin [mixin?]
-  (if (map? mixin?) mixin?
-                    (get mixins mixin? {})))
+(defn snippet-processor
+  "Return a reduced list of mixed in values"
+  [rule value styles]
+  (reduce #(merge %1 (get snippets %2 {})) {} value))
 
-(defn mixin [& opts]
-  (reduce #(merge %1 (get-mixin %2)) {} opts))
+(def processors
+  {::snippets snippet-processor})
+
+(defn process-rule
+  "Apply the given processors to a style rule"
+  [rule value block]
+  (let [processor (get processors rule #(assoc {} rule value))]
+    (processor rule value block)))
+
+(defn process-block
+  "Apply the given processes to a style block"
+  [block]
+  (reduce (fn [memo [k v]] (merge memo (process-rule k v block))) {} block))
+
+(defn process-styles
+  "Automatically processes styles"
+  [styles]
+  (into []
+    (map #(cond (sequential? %1) (process-styles %1)
+                (map? %1) (process-block %1)
+                true %1)
+         styles)))
+
+;; Helpers --------------------------------------------------------------------
+
+(defn kw->id
+  "Converts a keyword to a valid html id"
+  [kw]
+  (-> kw str (subs 1)
+      (clojure.string/replace "." "-")
+      (clojure.string/replace "/" "--")))
+
+(defn scope-styles
+  "Adds a scope to Stylesheet if required"
+  [kw id styles]
+  (if (-> kw name (= "global"))
+    styles
+    (into [(str "." id)] styles)))
+
+;; API ------------------------------------------------------------------------
+
+(defn defstyle
+  "Defines and scopes Stylesheet before rendering it"
+  [kw & styles]
+  (let [id            (kw->id kw)
+        scoped-styles (scope-styles kw id styles)]
+     (render-styles (-> scoped-styles process-styles css) id)))
+
+(defn style
+  "Add class for style to component.
+  Optionally can accept props as well"
+  ([kw] {:class (kw->id kw)})
+  ([kw opts] (update opts :class #(-> kw kw->id (str " " %)))))

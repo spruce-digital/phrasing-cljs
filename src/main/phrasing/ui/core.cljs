@@ -1,7 +1,7 @@
 (ns phrasing.ui.core
   (:require [reagent.core]
             [garden.core :refer [css]]
-            [phrasing.ui.css :refer [defstyle style mixin]]
+            [phrasing.ui.css :refer [defstyle style] :as css]
             [kee-frame.core :as kee]))
 
 (defstyle ::global
@@ -17,10 +17,10 @@
    [:span.title "Phrasing"]])
 
 (defstyle ::layout
-  ["&"        (mixin :flex-column
-                {:min-height "100vh"})]
-  [".content" (mixin :flex-column
-                {:background :grey})])
+  ["&"        {::css/snippets [:flex-column]
+               :min-height "100vh"}]
+  [".content" {::css/snippets [:flex-column]
+               :background :grey}])
 
 (defn layout [& children]
   [:section (style ::layout)
