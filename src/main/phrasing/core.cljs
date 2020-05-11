@@ -6,11 +6,13 @@
             [phrasing.subs :as sub]
             [phrasing.router :refer [routes router]]
             [kee-frame.core :as kee]
+            [stylefy.core :as stylefy]
             [re-frisk.core :as re-frisk]))
 
 (re-frisk/enable)
 
 (defn start-app! []
+  (stylefy/init)
   (kee/start! {:routes         routes
                :root-component [router]
                ; :initial-db     {:foo :bar}

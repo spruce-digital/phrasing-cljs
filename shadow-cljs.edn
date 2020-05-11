@@ -1,19 +1,37 @@
 ;; shadow-cljs configuration
-{:source-paths
- [
-  "src/dev"
-  "src/main"
-  "src/test"]
+{:source-paths ["src/dev"
+                "src/main"
+                "src/test"]
 
- :dependencies
- [
-  [cljs-http "0.1.46"]
-  [day8.re-frame/http-fx "v0.2.0"]
-  [re-frame "0.12.0"]
-  [reagent "0.10.0"]
-  [kee-frame "0.4.0"]
-  [re-frisk "1.3.0"]]
+ :dependencies [
+                [cider/cider-nrepl "0.24.0"]
+                [cljs-http "0.1.46"]
+                [day8.re-frame/http-fx "v0.2.0"]
+                [garden "1.3.10"]
+                [iced-nrepl "1.0.1"]
+                [kee-frame "0.4.0"]
+                [re-frame "0.12.0"]
+                [re-frisk "1.3.0"]
+                [reagent "0.10.0"]
+                [refactor-nrepl "2.5.0"]]
 
+ :nrepl {:cider false
+         :middleware [cider.nrepl/wrap-classpath
+                      cider.nrepl/wrap-clojuredocs
+                      cider.nrepl/wrap-complete
+                      cider.nrepl/wrap-debug
+                      cider.nrepl/wrap-format
+                      cider.nrepl/wrap-info
+                      cider.nrepl/wrap-macroexpand
+                      cider.nrepl/wrap-ns
+                      cider.nrepl/wrap-out
+                      cider.nrepl/wrap-spec
+                      cider.nrepl/wrap-test
+                      cider.nrepl/wrap-trace
+                      cider.nrepl/wrap-undef
+                      cider.nrepl/wrap-xref
+                      refactor-nrepl.middleware/wrap-refactor
+                      iced.nrepl/wrap-iced]}
 
  :dev-http {4500 "public"}
 
