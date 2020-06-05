@@ -1,6 +1,7 @@
 (ns phrasing.ui.css
   (:require [reagent.core]
             [garden.core :refer [css]]
+            [phrasing.ui.values :as v]
             [clojure.walk :refer [walk]]))
 
 ;; DOM Management -------------------------------------------------------------
@@ -31,16 +32,54 @@
 ;; Processors -----------------------------------------------------------------
 
 (def snippets {:flex-column {:display :flex
-                           :flex-direction :column
-                           :flex 1}})
+                             :flex-direction :column
+                             :flex 1}
+               :link {:text-decoration :none
+                      :color           :inherit}})
 
-(defn snippet-processor
-  "Return a reduced list of mixed in values"
-  [rule value styles]
-  (reduce #(merge %1 (get snippets %2 {})) {} value))
+(def buttons {:default {:border        :none
+                        :font          :mono
+                        :font-size     "14px"
+                        :padding       "12px 24px"
+                        :border-radius (v/default :border-radius)}
+              :glass   {:background :none
+                        :color      (v/color :logo)}
+              :action  {:background (v/color :logo)
+                        :color      (v/color :background)}})
+
+(def flex-centers {:default {:display :flex
+                             :align-items :center}
+                   :column  {:flex-direction :column}})
+
+(def fonts {:default {}
+            :archer  {:font-family "'Baveuse', serif"}
+            :mono    {:font-family "'Operator Mono', monospace"}
+            :sans    {:font-family "'Avenir Next', sans-serif"}})
+
+(def cards {:default {:background     (v/color :card)
+                      :border-radius  (v/default :border-radius)
+                      :box-shadow     (v/default :box-shadow)
+                      :display        :flex
+                      :flex-direction :column
+                      :align-items    :center
+                      :margin         "24px"
+                      :width          "100%"}
+            :padded {:padding "24px"}})
+
+(declare process-block)
+
+(defn process
+  [values key]
+  (process-block
+    (merge (values :default {}) (values key {}))))
 
 (def processors
-  {::snippets snippet-processor})
+  {::snippets (fn [rule value styles] ( -> #(merge %1 (get snippets %2 {}))
+                                           (reduce {} value)))
+   :button      #(process buttons %2)
+   :flex-center #(process flex-centers %2)
+   :font        #(process fonts %2)
+   :card        #(process cards %2)})
 
 (defn process-rule
   "Apply the given processors to a style rule"

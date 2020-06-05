@@ -1,10 +1,13 @@
 (ns phrasing.router
   (:require [reagent.core]
             [kee-frame.core :refer [switch-route]]
-            [phrasing.pages.search :as search-page]))
+            [phrasing.pages.search :as search]
+            [phrasing.pages.registration :as reg]))
 
 (def routes
-  [["/" search-page/route-key]
+  [["/" search/route]
+   ["/signin" reg/sign-in-route]
+   ["/signup" reg/sign-up-route]
    ["/admin" :admin]
    ["/account" :account]
    ["/library" :library]
@@ -12,5 +15,7 @@
 
 (defn router []
   [switch-route (comp :name :data)
-    search-page/route-key [search-page/root]
+    search/route [search/root]
+    reg/sign-in-route [reg/sign-in]
+    reg/sign-up-route [reg/sign-up]
     nil [:div "Loading..."]])

@@ -1,0 +1,160 @@
+@font-face {
+  font-family: "Baveuse";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/fonts/baveuse.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Avenir Next";
+  font-style: normal;
+  font-weight: 100;
+  src: url("/fonts/avenir_next_ultralight.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Avenir Next";
+  font-style: italic;
+  font-weight: 100;
+  src: url("/fonts/avenir_next_ultralight_italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Avenir Next";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/fonts/avenir_next_regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Avenir Next";
+  font-style: italic;
+  font-weight: 400;
+  src: url("/fonts/avenir_next_regular_italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Avenir Next";
+  font-style: normal;
+  font-weight: 500;
+  src: url("/fonts/avenir_next_medium.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Avenir Next";
+  font-style: italic;
+  font-weight: 500;
+  src: url("/fonts/avenir_next_medium_italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Avenir Next";
+  font-style: normal;
+  font-weight: 600;
+  src: url("/fonts/avenir_next_demibold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Avenir Next";
+  font-style: italic;
+  font-weight: 600;
+  src: url("/fonts/avenir_next_demibold_italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Avenir Next";
+  font-style: normal;
+  font-weight: 700;
+  src: url("/fonts/avenir_next_bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Avenir Next";
+  font-style: italic;
+  font-weight: 700;
+  src: url("/fonts/avenir_next_bold_italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Avenir Next";
+  font-style: normal;
+  font-weight: 800;
+  src: url("/fonts/avenir_next_heavy.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Avenir Next";
+  font-style: italic;
+  font-weight: 800;
+  src: url("/fonts/avenir_next_heavy_italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Operator Mono";
+  font-style: normal;
+  font-weight: 100;
+  src: url("/fonts/operator_mono_ultralight.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Operator Mono";
+  font-style: italic;
+  font-weight: 100;
+  src: url("/fonts/operator_mono_ultralight_italic.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Operator Mono";
+  font-style: normal;
+  font-weight: 200;
+  src: url("/fonts/operator_mono_light.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Operator Mono";
+  font-style: italic;
+  font-weight: 200;
+  src: url("/fonts/operator_mono_light_italic.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Operator Mono";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/fonts/operator_mono_book.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Operator Mono";
+  font-style: italic;
+  font-weight: 400;
+  src: url("/fonts/operator_mono_book_italic.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Operator Mono";
+  font-style: normal;
+  font-weight: 500;
+  src: url("/fonts/operator_mono_medium.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Operator Mono";
+  font-style: italic;
+  font-weight: 500;
+  src: url("/fonts/operator_mono_medium_italic.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Operator Mono";
+  font-style: normal;
+  font-weight: 700;
+  src: url("/fonts/operator_mono_bold.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Operator Mono";
+  font-style: italic;
+  font-weight: 700;
+  src: url("/fonts/operator_mono_bold_italic.otf") format("opentype");
+}
