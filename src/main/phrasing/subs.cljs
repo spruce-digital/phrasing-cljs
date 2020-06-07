@@ -7,6 +7,6 @@
     (:items db)))
 
 (reg-sub
- ::errors
+ ::flash
  (fn [db _]
-   (get-in db [:notifications :errors])))
+   (db :flash)))

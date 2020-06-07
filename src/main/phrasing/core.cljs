@@ -5,6 +5,7 @@
             [phrasing.events :as event]
             [phrasing.subs :as sub]
             [phrasing.router :refer [routes router]]
+            [phrasing.db :refer [default-db]]
             [kee-frame.core :as kee]
             [re-frisk.core :as re-frisk]))
 
@@ -13,7 +14,8 @@
 (defn start-app! []
   (kee/start! {:routes         routes
                :root-component [router]
-               ; :initial-db     {:foo :bar}
+               :initial-db     default-db
+               :app-db-spec    :phrasing.db/db
                :debug?         true}))
 
 (defn ^:dev/after-load clear-cache-and-render!

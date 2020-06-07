@@ -48,17 +48,27 @@
 
 ;; Notifications ---------------------------------------------------------------
 
-(defn notifications []
-  (let [errors (rf/subscribe [::subs/errors])]
-    [:section (style ::notifications)
-      (when (count @errors)
-        [:div.errors])]))
+(defn flash []
+  (let [flash @(rf/subscribe [::subs/flash])]
+    [:section (style ::flash)
+      (when flash
+        [:div.flash {:class (-> flash first name)} (last flash)])]))
 
-(defstyle ::notifications
-  ["&"        {}]
-  [".errors"  {:border-color (str "1px solid " (v/color :red))
-               :color        (v/color :red)
-               :padding      "12px"}])
+(defstyle ::flash
+  ["&"        {:max-width "600px"
+               :margin "0 auto"}]
+  [".flash"   {:border-width "1px"
+               :border-style :solid
+               :padding "12px"
+               :margin-top "24px"
+               :border-radius (v/default :border-radius)
+               :text-align :center}]
+  [".error"   {:border-color (v/nord :red)
+               :color (v/nord :red)
+               :background (v/adjust (v/nord :red) :alpha 0.2)}]
+  [".success" {:border-color (v/nord :green)
+               :color (v/nord :green)
+               :background (v/adjust (v/nord :green) :alpha 0.2)}])
 
 ;; Layout ----------------------------------------------------------------------
 
@@ -66,7 +76,7 @@
   [:section (style ::layout)
    [navigation]
    [:div.content-container
-     (notifications)
+     (flash)
      (into [:div.content] children)]])
 
 (defstyle ::layout

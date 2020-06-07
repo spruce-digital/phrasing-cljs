@@ -31,7 +31,8 @@
 
 (defstyle ::registration
   ["&"            {:card :padded
-                   :max-width "600px"}]
+                   :max-width "600px"
+                   :box-sizing :border-box}]
   ["button"       {:button :action
                    :width "100%"
                    :margin "12px"}

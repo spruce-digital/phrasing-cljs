@@ -13,15 +13,9 @@
 
 (reg-event-db ::sign-in-failure
   (fn [db event]
-    (println "failure")
-    (println db)
-    (println event)
-    db))
+    (assoc db :flash [:error "Invalid credentials"])))
 
 (reg-event-db ::sign-in-success
   (fn [db event]
-    (println "success")
-    (println db)
-    (println event)
-    db))
+    (assoc db :flash [:success "Sign in successful!"])))
 
