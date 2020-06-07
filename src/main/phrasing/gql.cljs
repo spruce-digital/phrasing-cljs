@@ -1,6 +1,20 @@
 (ns phrasing.gql
-  (:require [re-frame.core :refer [reg-event-fx ->interceptor]]
-            [ajax.core :as ajax]))
+  (:require [re-frame.core :refer [reg-event-fx reg-fx ->interceptor]]
+            [ajax.core :as ajax]
+            [cljs.spec.alpha :as s]))
+
+;; Initial spec of gql
+;; TODO: ensure that variables present in :query have matching :vars and :defs
+(def def-regex #"^[A-Z][a-zA-Z]*!?$")
+(s/def ::def (s/and string? #(re-matches def-regex %)))
+
+(s/def ::op #{:query :mutation :subscription})
+(s/def ::defs (s/map-of keyword? ::def))
+(s/def ::vars (s/map-of keyword? any?))
+(s/def ::query string?)
+
+(s/def ::gql (s/keys :req-un [::query]
+                     :opt-un [::op ::defs ::vars]))
 
 (defn gql-operation
   "Get the operation (:op) from the gql constructor.
@@ -81,15 +95,35 @@
                     :response-format (ajax/json-response-format {:keywords? true})}]
     (assoc effects :http-xhrio (conj http-xhrio config))))
 
+(defn handle-invalid-gql
+  "Print information to the console when a gql descriptor is not valid"
+  [event gql]
+  (let [prefix (-> event first str)]
+    (js/console.error prefix "invalid :gql in event " (-> event clj->js))
+    (js/console.error prefix "gql: " (clj->js gql))
+    (js/console.error prefix "explain-str: " (s/explain-str ::gql gql))
+    (js/console.error prefix "explain-data: " (clj->js (s/explain-data ::gql gql)))))
+
+;; An interceptor is used so we have access to the full context without
+;; needing to manually pass it in. Essentially we are just registering
+;; an effect with slightly more access.
 (def gql
   (->interceptor
     :id     :gql
     :after  (fn [context]
-             (let [on-success [::success (get-in context [:coeffects :event])]
-                   ; on-failure (-> context (get-in [:coeffects :event]) failure-event)]
-                   on-failure [::failure (get-in context [:coeffects :event])]]
-              (update context :effects #(gql->http-xhrio %1 {:on-success on-success
-                                                             :on-failure on-failure}))))))
+             (let [event      (get-in context [:coeffects :event])
+                   gql        (get-in context [:effects :gql])
+                   on-success [::success event]
+                   on-failure [::failure event]]
+              (if-not (s/valid? ::gql gql)
+                (handle-invalid-gql event gql)
+                (update context :effects #(gql->http-xhrio %1 {:on-success on-success
+                                                               :on-failure on-failure})))))))
+
+;; Register the :gql effect as a no-op to squelch error messages.
+;; gql queries should make use of the gql interceptor
+(reg-fx :gql (fn [_]))
+
 
 ; (println
 ;   (construct-gql-data {:op    :mutation
