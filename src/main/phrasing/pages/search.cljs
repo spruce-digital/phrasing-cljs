@@ -5,8 +5,6 @@
             [ajax.core :as ajax]
             [kee-frame.core :as kee]))
 
-(def route ::search)
-
 (defn gq
   ([query] (gq query {}))
   ([query vars]

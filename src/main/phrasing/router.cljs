@@ -2,12 +2,14 @@
   (:require [reagent.core]
             [kee-frame.core :refer [switch-route]]
             [phrasing.pages.search :as search]
-            [phrasing.pages.registration :as reg]))
+            [phrasing.pages.registration :as reg]
+            [phrasing.pages.home :as home]))
 
 (def routes
-  [["/" search/route]
-   ["/signin" reg/sign-in-route]
-   ["/signup" reg/sign-up-route]
+  [["/" :home]
+   ["/search" :search]
+   ["/signin" :sign-in]
+   ["/signup" :sign-up]
    ["/admin" :admin]
    ["/account" :account]
    ["/library" :library]
@@ -15,7 +17,8 @@
 
 (defn router []
   [switch-route (comp :name :data)
-    search/route [search/root]
-    reg/sign-in-route [reg/sign-in]
-    reg/sign-up-route [reg/sign-up]
-    nil [:div "Loading..."]])
+   :home [home/root]
+   :search [search/root]
+   :sign-in [reg/root-sign-in]
+   :sign-up [reg/root-sign-up]
+   nil [:div "Loading..."]])

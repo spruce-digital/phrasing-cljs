@@ -4,6 +4,7 @@
             [phrasing.ui.css :refer [defstyle style] :as css]
             [phrasing.ui.values :as v]
             [phrasing.subs :as subs]
+            [phrasing.events :as e]
             [kee-frame.core :as kee]
             [re-frame.core :as rf]))
 
@@ -20,14 +21,19 @@
 ;; Navigation ------------------------------------------------------------------
 
 (defn navigation []
-  [:section (style ::navigation)
-   [:span.title
-    [:a.logo {:href "/"} "Phrasing"]]
-   [:ul.registration
-    [:a {:href "/signin"}
-     [:button.sign-in "Sign In"]]
-    [:a {:href "/signup"}
-     [:button.sign-up "Sign Up"]]]])
+  (let [is-authed? @(rf/subscribe [::subs/is-authed?])]
+    [:section (style ::navigation)
+     [:span.title
+      [:a.logo {:href "/"} "Phrasing.app"]]
+     (if is-authed?
+       [:ul.registration
+        [:a {:href "#"}
+         [:button.sign-out {:on-click #(rf/dispatch [::e/sign-out])} "Sign Out"]]]
+       [:ul.registration
+        [:a {:href "/signin"}
+         [:button.sign-in "Sign In"]]
+        [:a {:href "/signup"}
+         [:button.sign-up "Sign Up"]]])]))
 
 (defstyle ::navigation
   ["&"      {:background    (v/color :card)
@@ -41,6 +47,8 @@
              :font-size     "36px"
              :font          :archer}]
   [".logo"  {::css/snippets [:link]}]
+  [".sign-out" {:button :glass}
+   ["&:hover"  {:cursor :pointer}]]
   [".sign-in" {:button :glass}
    ["&:hover" {:cursor :pointer}]]
   [".sign-up" {:button :action}

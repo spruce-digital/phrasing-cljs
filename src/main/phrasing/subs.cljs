@@ -10,3 +10,8 @@
  ::flash
  (fn [db _]
    (db :flash)))
+
+(reg-sub
+ ::is-authed?
+ (fn [db _]
+   (-> db :auth :token some?)))
