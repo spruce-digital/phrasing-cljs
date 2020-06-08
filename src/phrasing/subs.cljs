@@ -23,4 +23,16 @@
 
 (reg-sub ::phrases
  (fn [db _]
-   (db :phrases)))
+   (-> db :phrases vals)))
+
+;; get a param from the path
+(reg-sub ::path-param
+ (fn [db [_ param]]
+   (-> db :kee-frame/route :path-params param)))
+
+(reg-sub ::phrase
+ (fn [db [_ id]]
+  (if (= id "new")
+    (db :new-phrase)
+    (get-in db [:phrases id]))))
+

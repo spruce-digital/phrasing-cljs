@@ -1,5 +1,6 @@
 (ns phrasing.pages.search
   (:require [reagent.core :as r]
+            [kee-frame.core :as k]
             [phrasing.ui.core :as ui]
             [phrasing.ui.css :refer [defstyle style]]
             [phrasing.ui.values :as v]
@@ -30,7 +31,13 @@
 
 (rf/reg-event-db ::fetch-success
   (fn [db [_ res]]
-    (assoc db :phrases (-> res :data :phrases))))
+    (->> (-> res :data :phrases)
+         (reduce #(assoc %1 (%2 :id) %2) {})
+         (assoc db :phrases))))
+
+(reduce #(assoc %1 (%2 :id) %2)
+        {}
+        [{:id 1 :foo :bar} {:id 2 :baz :qux}])
 
 (rf/reg-event-db ::fetch-failure
   (fn [db [_ res]]
@@ -69,10 +76,7 @@
      [:ul.suggestions
        (for [sugg suggestions]
          ^{:key (sugg :id)}
-         [:li
-          [:span.tag (->> sugg :language :code (str "@"))]
-          " "
-          (sugg :text)])
+         [ui/translation :li sugg])
        [:li
         [:span.tag "Add phrase "]
         query]])))
@@ -91,13 +95,10 @@
         (when @focused? [suggestions])]))))
 
 (defn phrase-card [phrase]
-  [:article (style ::phrase)
-   (for [tr (phrase :translations)]
-    ^{:key (tr :id)}
-    [:div.tr
-     [:span.tag (->> tr :language :code (str "@"))]
-     " "
-     [:span.text (tr :text)]])])
+  [:a {:href (k/path-for [:phrase phrase]) :style {:color :inherit}}
+    [:article (style ::phrase)
+     (for [tr (phrase :translations)]
+      ^{:key (tr :id)} [ui/translation tr])]])
 
 (defn phrase-list []
   (let [phrases @(rf/subscribe [::sub/phrases])]

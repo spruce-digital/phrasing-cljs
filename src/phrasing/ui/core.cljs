@@ -8,7 +8,7 @@
             [kee-frame.core :as k]
             [re-frame.core :as rf]))
 
-;; Global Styles -------------------------------------------
+;; -- Global Styles ----------------------------------------
 
 (defstyle ::global
   ["body" "html" {:margin 0
@@ -18,7 +18,7 @@
   ["a" {:text-decoration :none
         :color (v/color :link)}])
 
-;; Navigation ----------------------------------------------
+;; -- Navigation -------------------------------------------
 
 (defn navigation []
   (let [is-authed? @(rf/subscribe [::subs/is-authed?])
@@ -61,7 +61,7 @@
   [".go-to-app" {:button :glass}
    ["&:hover"   {:cursor :pointer}]])
 
-;; Flash ---------------------------------------------------
+;; -- Flash ------------------------------------------------
 
 (defn flash []
   (let [flash @(rf/subscribe [::subs/flash])]
@@ -85,7 +85,7 @@
                :color (v/nord :green)
                :background (v/adjust (v/nord :green) :alpha 0.2)}])
 
-;; Layout --------------------------------------------------
+;; -- Layout -----------------------------------------------
 
 (defn layout [& children]
   [:section (style ::layout)
@@ -100,3 +100,17 @@
   [".content" {::css/snippets [:flex-column]
                :color         (v/color :text)
                :flex-center   :column}])
+
+;; -- Translation ------------------------------------------
+
+(defn translation
+  ([tr] [translation :div tr])
+  ([tag {:keys [id text language]}]
+   [tag (style ::translation)
+    [:span.tag (str "@" (language :code) " ")]
+    [:span.text text]]))
+
+(defstyle ::translation
+  ["&"        {:width "100%"
+               :text-align :left}]
+  [".tag"     {:color (v/color :bang)}])
