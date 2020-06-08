@@ -35,6 +35,27 @@
   (fn [db _]
     (assoc db :flash "Error fetching phrase")))
 
+;; -- Components -------------------------------------------
+
+(defn show-phrase [phrase editing?]
+  [:section (style ::phrase)
+    [:div.title-bar
+      [:h1 "Show Phrase"]
+      [:span.action {:on-click #(swap! editing? not)}
+        "Edit Phrase"]]
+    (when phrase
+      (for [tr (phrase :translations)]
+        ^{:key (tr :id)}
+        [:div.tr [ui/translation tr]]))])
+
+(defn edit-phrase [phrase editing?]
+  [:section (style ::phrase)
+    [:div.title-bar
+      [:h1 "Edit Phrase"]
+      [:span.action {:on-click #(swap! editing? not)}
+        "Save"]]
+    [:p "Edit functionality coming soon!"]])
+
 ;; -- Roots ------------------------------------------------
 
 (defn root-new []
@@ -43,14 +64,12 @@
 
 (defn root-existing [id]
   (rf/dispatch [::fetch id])
-  (fn [id]
-    (let [phrase @(rf/subscribe [::sub/phrase id])]
-      [:section (style ::root)
-        [:h1 "Show Phrase"]
-        (when phrase
-          (for [tr (phrase :translations)]
-            ^{:key (tr :id)}
-            [:div.tr [ui/translation tr]]))])))
+  (let [editing? (r/atom false)]
+    (fn [id]
+      (let [phrase @(rf/subscribe [::sub/phrase id])]
+        (if @editing?
+          [edit-phrase phrase editing?]
+          [show-phrase phrase editing?])))))
 
 ;; -- Handler ----------------------------------------------
 ;;
@@ -76,9 +95,20 @@
 
 ;; -- Styles -----------------------------------------------
 
-(defstyle ::root
+(defstyle ::phrase
   ["&"    {:width "100%"
-           :max-width (v/default :max-width)}]
+           :max-width (v/default :max-width)
+           :margin :24px}]
+  [".title-bar" {:display :flex
+                 :justify-content :space-between
+                 :align-items :flex-end
+                 :margin-bottom :12px}
+   ["h1"        {:margin 0}]
+   [".action"   {:font-size :14px
+                 :color (v/color :bang)}
+    ["&:hover"  {:cursor :pointer
+                 :text-decoration :underline}]]]
+
   [".tr"  {:card :padded
            :margin 0}])
 

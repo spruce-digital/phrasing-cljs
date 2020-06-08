@@ -67,8 +67,8 @@
 (reg-event-fx ::sign-up-success
   (fn [{db :db} [_ _ res]]
     {:db (-> db (assoc :flash [:success "Sign up successful!"])
-                (assoc :auth {:token (-> res :data :signIn :token)})
-                (assoc :user (-> res :data :signIn :user)))
+                (assoc :auth {:token (-> res :data :signUp :token)})
+                (assoc :user (-> res :data :signUp :user)))
      :navigate-to [:search]
      :dispatch [::save-to-ls]}))
 

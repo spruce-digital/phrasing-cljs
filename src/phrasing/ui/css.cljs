@@ -44,7 +44,7 @@
                         :border-radius (v/default :border-radius)}
               :glass   {:background :none
                         :color      (v/color :bang)}
-              :action  {:background (v/color :bang)
+              :action  {:background (v/color :logo)
                         :color      (v/color :background)}})
 
 (def flex-centers {:default {:display :flex
@@ -64,7 +64,8 @@
                       :align-items    :center
                       :margin         "24px"
                       :width          "100%"}
-            :padded {:padding "24px"}})
+            :padded {:padding "24px"
+                     :box-sizing :border-box}})
 
 (declare process-block)
 
