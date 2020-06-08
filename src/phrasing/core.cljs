@@ -2,7 +2,7 @@
   (:require [reagent.core :as r]
             [reagent.dom :as dom]
             [re-frame.core :as rf]
-            [phrasing.events :as event]
+            [phrasing.events :as e]
             [phrasing.subs :as sub]
             [phrasing.router :refer [routes router]]
             [phrasing.db :refer [default-db]]
@@ -16,7 +16,8 @@
                :root-component [router]
                :initial-db     default-db
                :app-db-spec    :phrasing.db/db
-               :debug?         true}))
+               :debug?         true})
+  (rf/dispatch [::e/init]))
 
 (defn ^:dev/after-load clear-cache-and-render!
   []

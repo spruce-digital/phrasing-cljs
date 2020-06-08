@@ -1,13 +1,24 @@
 (ns phrasing.events
-  (:require [re-frame.core :refer [reg-event-db reg-event-fx]]
-            [phrasing.gql :refer [gql]]
+  (:require [re-frame.core :refer [reg-event-db reg-event-fx inject-cofx]]
+            [phrasing.gql :refer [->gql]]
+            [phrasing.db :refer [update-ls]]
             [kee-frame.core :as kee]))
+
+(reg-event-fx ::init
+  [(inject-cofx :load-ls)]
+  (fn [{:keys [db ls]}]
+    {:db (merge db ls)}))
+
+(reg-event-db ::save-to-ls
+  [update-ls]
+  (fn [db _] db))
 
 (reg-event-fx ::sign-out
   (fn [{db :db} _]
     {:db (-> db (dissoc :auth)
                 (assoc :flash [:success "Sign out successful"]))
-     :navigate-to [:home]}))
+     :navigate-to [:home]
+     :dispatch [::save-to-ls]}))
 
 (def query-sign-in "
   signIn(input: $input) {
@@ -16,7 +27,7 @@
   }")
 
 (reg-event-fx ::sign-in
-  [gql]
+  [->gql]
   (fn [cofx [_ input]]
     {:gql {:op    :mutation
            :defs  {:input "SessionInput!"}
@@ -32,7 +43,8 @@
     {:db (-> db (assoc :flash [:success "Sign in successful!"])
                 (assoc :auth {:token (-> res :data :signIn :token)})
                 (assoc :user (-> res :data :signIn :user)))
-     :navigate-to [:search]}))
+     :navigate-to [:search]
+     :dispatch [::save-to-ls]}))
 
 (def query-sign-up "
   signUp(input: $input) {
@@ -41,7 +53,7 @@
   }")
 
 (reg-event-fx ::sign-up
-  [gql]
+  [->gql]
   (fn [cofx [_ input]]
     {:gql {:op    :mutation
            :defs  {:input "SessionInput!"}
@@ -57,5 +69,6 @@
     {:db (-> db (assoc :flash [:success "Sign up successful!"])
                 (assoc :auth {:token (-> res :data :signIn :token)})
                 (assoc :user (-> res :data :signIn :user)))
-     :navigate-to [:search]}))
+     :navigate-to [:search]
+     :dispatch [::save-to-ls]}))
 

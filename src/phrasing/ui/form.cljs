@@ -1,7 +1,10 @@
 (ns phrasing.ui.form
   (:require [reagent.core :as r]
+            [re-frame.core :as rf]
             [phrasing.ui.css :refer [defstyle style kw->id]]
             [phrasing.ui.values :as v]))
+
+;; -- Helpers ----------------------------------------------
 
 (defn kw->label [kw]
   (->> (clojure.string/split (name kw) #"\b")
@@ -11,6 +14,17 @@
 (defn swap-field!
   [src field event]
   (swap! src assoc field (-> event .-target .-value)))
+
+;; -- Methods ----------------------------------------------
+
+(defn dispatch
+  "Helper function to be used for event handlers. Prevents defaults
+  and dispatched the event to re-frame"
+  [dom-event rf-event]
+  (.preventDefault dom-event)
+  (rf/dispatch rf-event))
+
+;; -- Fields -----------------------------------------------
 
 (defn text [data field]
   [:fieldset (style ::fieldset)
@@ -29,6 +43,15 @@
        :value (@data field)
        :on-change #(swap-field! data field %)}]])
 
+(defn formatted [data field opts]
+  [:fieldset (style ::formatted)
+   [:input.formatted
+     (merge opts {:type "text"
+                  :value (@data field)
+                  :on-change #(swap-field! data field %)})]])
+
+;; -- Styles -----------------------------------------------
+
 (defstyle ::fieldset
   ["&"            {:border :none
                    :width  "100%"
@@ -43,3 +66,9 @@
                    :color (v/color :text)
                    :border-radius (v/default :border-radius)
                    :font :mono}])
+
+
+(defstyle ::formatted
+  ["&" {:border :none
+        :padding 0
+        :margin 0}])

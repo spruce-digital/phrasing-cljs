@@ -5,10 +5,10 @@
             [phrasing.ui.values :as v]
             [phrasing.subs :as subs]
             [phrasing.events :as e]
-            [kee-frame.core :as kee]
+            [kee-frame.core :as k]
             [re-frame.core :as rf]))
 
-;; Global Styles ---------------------------------------------------------------
+;; Global Styles -------------------------------------------
 
 (defstyle ::global
   ["body" "html" {:margin 0
@@ -18,17 +18,22 @@
   ["a" {:text-decoration :none
         :color (v/color :link)}])
 
-;; Navigation ------------------------------------------------------------------
+;; Navigation ----------------------------------------------
 
 (defn navigation []
-  (let [is-authed? @(rf/subscribe [::subs/is-authed?])]
+  (let [is-authed? @(rf/subscribe [::subs/is-authed?])
+        route-key @(rf/subscribe [::subs/route-key])
+        logo-href (k/path-for [(if is-authed? :search :home)])]
     [:section (style ::navigation)
      [:span.title
-      [:a.logo {:href "/"} "Phrasing.app"]]
+      [:a.logo {:href logo-href} "Phrasing.app"]]
      (if is-authed?
        [:ul.registration
-        [:a {:href "#"}
-         [:button.sign-out {:on-click #(rf/dispatch [::e/sign-out])} "Sign Out"]]]
+        (if (= route-key :home)
+          [:a {:href (k/path-for [:search])}
+           [:button.go-to-app "Go to app ➜"]]
+          [:a {:href "#"}
+           [:button.sign-out {:on-click #(rf/dispatch [::e/sign-out])} "Sign Out"]])]
        [:ul.registration
         [:a {:href "/signin"}
          [:button.sign-in "Sign In"]]
@@ -52,9 +57,11 @@
   [".sign-in" {:button :glass}
    ["&:hover" {:cursor :pointer}]]
   [".sign-up" {:button :action}
-   ["&:hover" {:cursor :pointer}]])
+   ["&:hover" {:cursor :pointer}]]
+  [".go-to-app" {:button :glass}
+   ["&:hover"   {:cursor :pointer}]])
 
-;; Notifications ---------------------------------------------------------------
+;; Flash ---------------------------------------------------
 
 (defn flash []
   (let [flash @(rf/subscribe [::subs/flash])]
@@ -78,7 +85,7 @@
                :color (v/nord :green)
                :background (v/adjust (v/nord :green) :alpha 0.2)}])
 
-;; Layout ----------------------------------------------------------------------
+;; Layout --------------------------------------------------
 
 (defn layout [& children]
   [:section (style ::layout)

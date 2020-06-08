@@ -35,8 +35,22 @@
   Strip leading and trailing curly braces, as they are included
   as part of the query string template."
   [gql]
-  (-> (get gql :query "")
-      (clojure.string/replace #"^\{?(.*)\}?$" "$1")))
+  (let [query    (gql :query)
+        wrapped? (-> query first (= "{"))]
+    (if-not wrapped?
+      query
+      (-> query (clojure.string/replace #"^\{\s*" "")
+                (clojure.string/replace #"\s*\}$" "")))))
+
+(defn gql-query-string
+  "Get the query string from the gql constructor, including operations,
+  definitions, and template"
+  [gql]
+  (let [operation   (gql-operation gql)
+        definitions (gql-definitions gql)
+        query       (gql-query gql)]
+    (-> (str operation "(" definitions "){" query "}")
+        (clojure.string/replace "()" ""))))
 
 (defn construct-gql-data
   "Convert a gql constructor to a json string ready to be sent to
@@ -44,8 +58,9 @@
   :query is a fully templated query string and :variables is the :vars
   key in the gql constructor"
   [gql]
-  (let [query (str (gql-operation gql) "(" (gql-definitions gql) "){" (gql-query gql) "}")]
-    (->> {:query query :variables (gql :vars)}
+  (let [query-string (gql-query-string gql)
+        variables    (get gql :vars {})]
+    (->> {:query query-string :variables variables}
          (clj->js)
          (.stringify js/JSON))))
 
@@ -107,17 +122,17 @@
 ;; An interceptor is used so we have access to the full context without
 ;; needing to manually pass it in. Essentially we are just registering
 ;; an effect with slightly more access.
-(def gql
+(def ->gql
   (->interceptor
     :id     :gql
-    :after  (fn [context]
-             (let [event      (get-in context [:coeffects :event])
-                   gql        (get-in context [:effects :gql])
+    :after  (fn [ctx]
+             (let [event      (get-in ctx [:coeffects :event])
+                   gql        (get-in ctx [:effects :gql])
                    on-success [::success event]
                    on-failure [::failure event]]
               (if-not (s/valid? ::gql gql)
                 (handle-invalid-gql event gql)
-                (update context :effects #(gql->http-xhrio %1 {:on-success on-success
+                (update ctx :effects #(gql->http-xhrio %1 {:on-success on-success
                                                                :on-failure on-failure})))))))
 
 ;; Register the :gql effect as a no-op to squelch error messages.
