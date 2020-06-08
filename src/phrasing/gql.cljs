@@ -96,19 +96,31 @@
     (println cofx)
     (println event)))
 
-(defn gql->http-xhrio
-  "Takes the gql constructor from the context and assocs the appropriate
-  http-xhrio data needed to submit it as a request. Parses a gql query
-  and fires success/failure based on the original event name. Accepts a
-  hash of custom config options to override or append any values"
-  [{gql :gql event :event :as effects} config]
+(defn update-xhrio-req
+  "Accepts an effects object and gql descriptor and updates the :http-xhrio
+  effect with the appropriate request information."
+  [fx gql]
   (let [http-xhrio {:method          :post
                     :uri             "http://localhost:4000/api"
                     :headers         {"Content-Type" "application/json"}
                     :body            (construct-gql-data gql)
                     :format          (ajax/json-request-format)
                     :response-format (ajax/json-response-format {:keywords? true})}]
-    (assoc effects :http-xhrio (conj http-xhrio config))))
+    (update fx :http-xhrio merge http-xhrio)))
+
+(defn update-xhrio-handlers
+  "Takes an effects map and handlers and updates the :http-xhrio config with the handlers"
+  [fx handlers]
+  (update fx :http-xhrio merge handlers))
+
+(defn update-xhrio-token
+  "Takes and effects map and token, and if the token is present adds the appropriate
+  authorization header"
+  [fx token]
+  (if (clojure.string/blank? token)
+    fx
+    (let [auth-headers {"Authorization" (str "Bearer " token)}]
+      (update-in fx [:http-xhrio :headers] merge auth-headers))))
 
 (defn handle-invalid-gql
   "Print information to the console when a gql descriptor is not valid"
@@ -128,15 +140,18 @@
     :after  (fn [ctx]
              (let [event      (get-in ctx [:coeffects :event])
                    gql        (get-in ctx [:effects :gql])
-                   on-success [::success event]
-                   on-failure [::failure event]
+                   token      (some-> ctx :coeffects :db :auth :token)
+                   handlers   {:on-success [::success event]
+                               :on-failure [::failure event]}
                    no-gql?    (nil? gql)
                    invalid?   (not (s/valid? ::gql gql))]
               (cond
                 no-gql?  ctx
                 invalid? (handle-invalid-gql event gql)
-                :else    (update ctx :effects #(gql->http-xhrio %1 {:on-success on-success
-                                                                    :on-failure on-failure})))))))
+                :else    (update ctx :effects #(-> %1 (update-xhrio-req gql)
+                                                      (update-xhrio-handlers handlers)
+                                                      (update-xhrio-token token))))))))
+
 
 ;; Register the :gql effect as a no-op to squelch error messages.
 ;; gql queries should make use of the gql interceptor

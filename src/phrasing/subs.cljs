@@ -20,3 +20,7 @@
 (reg-sub ::search
  (fn [db _]
    (db :search)))
+
+(reg-sub ::phrases
+ (fn [db _]
+   (db :phrases)))

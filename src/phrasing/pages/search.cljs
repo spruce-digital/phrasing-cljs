@@ -90,6 +90,22 @@
                         :on-blur #(reset! focused? false)}]
         (when @focused? [suggestions])]))))
 
+(defn phrase-card [phrase]
+  [:article (style ::phrase)
+   (for [tr (phrase :translations)]
+    ^{:key (tr :id)}
+    [:div.tr
+     [:span.tag (->> tr :language :code (str "@"))]
+     " "
+     [:span.text (tr :text)]])])
+
+(defn phrase-list []
+  (let [phrases @(rf/subscribe [::sub/phrases])]
+    [:section.phrase-list
+      (if (empty? phrases)
+        [:h4 "Start by adding a phrase"]
+        (for [phrase phrases]
+          ^{:key (phrase :id)} [phrase-card phrase]))]))
 
 ;; -- Root -------------------------------------------------
 
@@ -98,7 +114,9 @@
   (fn []
     [ui/layout
      [:section (style ::root)
-      [search-bar]]]))
+      [search-bar]
+      [phrase-list]]]))
+
 
 ;; -- Styles -----------------------------------------------
 
@@ -136,5 +154,12 @@
      [".tag"      {:color (v/color :bang)}]
      ["&:last-child" {:border-bottom :none}]]])
 
-
-
+(defstyle ::phrase
+  ["&"      {:card :default
+             :margin 0
+             :margin-top :12px
+             :padding :24px
+             :box-sizing :border-box}]
+  [".tr" {:width "100%"
+          :text-align :left}
+   [".tag" {:color (v/color :bang)}]])
