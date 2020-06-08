@@ -32,6 +32,11 @@
                              :opt-un [::language]))
 (s/def ::translations (s/* ::translation))
 
+;; search
+(s/def :phrasing.db.search/suggestions (s/* ::translation))
+(s/def :phrasing.db.search/query string?)
+(s/def ::search (s/keys :req-un [:phrasing.db.search/suggestions :phrasing.db.search/query]))
+
 ;; phrases
 (s/def ::phrase (s/keys :req-un [::id]
                         :opt-un [::translations]))
@@ -42,13 +47,15 @@
 
 ;; app-db
 (s/def ::db (s/keys :opt-un [::flash ::auth ::user ::phrases]
-                    :req-un [::ready]))
+                    :req-un [::ready ::search]))
 
 
 ;; -- Default app-db value ----------------------
 
 (def default-db
-  {:ready false})
+  {:ready false
+   :search {:query ""
+            :suggestions []}})
 
 ;; -- LocalStorage -----------------------------------------
 ;;

@@ -43,8 +43,8 @@
                         :padding       "12px 24px"
                         :border-radius (v/default :border-radius)}
               :glass   {:background :none
-                        :color      (v/color :logo)}
-              :action  {:background (v/color :logo)
+                        :color      (v/color :bang)}
+              :action  {:background (v/color :bang)
                         :color      (v/color :background)}})
 
 (def flex-centers {:default {:display :flex

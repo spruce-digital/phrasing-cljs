@@ -129,11 +129,14 @@
              (let [event      (get-in ctx [:coeffects :event])
                    gql        (get-in ctx [:effects :gql])
                    on-success [::success event]
-                   on-failure [::failure event]]
-              (if-not (s/valid? ::gql gql)
-                (handle-invalid-gql event gql)
-                (update ctx :effects #(gql->http-xhrio %1 {:on-success on-success
-                                                               :on-failure on-failure})))))))
+                   on-failure [::failure event]
+                   no-gql?    (nil? gql)
+                   invalid?   (not (s/valid? ::gql gql))]
+              (cond
+                no-gql?  ctx
+                invalid? (handle-invalid-gql event gql)
+                :else    (update ctx :effects #(gql->http-xhrio %1 {:on-success on-success
+                                                                    :on-failure on-failure})))))))
 
 ;; Register the :gql effect as a no-op to squelch error messages.
 ;; gql queries should make use of the gql interceptor

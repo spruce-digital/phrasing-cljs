@@ -47,7 +47,7 @@
              :padding       "0px 24px"
              :font          :mono
              :box-shadow    (v/default :box-shadow)}]
-  [".title" {:color         (v/color :logo)
+  [".title" {:color         (v/color :text)
              :flex          1
              :font-size     "36px"
              :font          :archer}]

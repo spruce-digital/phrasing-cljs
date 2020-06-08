@@ -16,3 +16,7 @@
 (reg-sub ::route-key
  (fn [db _]
    (some-> db :kee-frame/route :data :name)))
+
+(reg-sub ::search
+ (fn [db _]
+   (db :search)))

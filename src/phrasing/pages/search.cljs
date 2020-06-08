@@ -5,6 +5,7 @@
             [phrasing.ui.values :as v]
             [phrasing.ui.form :as form]
             [phrasing.gql :refer [->gql]]
+            [phrasing.subs :as sub]
             [cljs.pprint :refer [pprint]]
             [ajax.core :as ajax]
             [re-frame.core :as rf]))
@@ -35,20 +36,69 @@
   (fn [db [_ res]]
     (assoc db :flash [:error "Failed to fetch phrases"])))
 
+(def query-suggestions
+  "translations(query: $query) {
+    id
+    text
+    language { code }
+  }")
+
+(rf/reg-event-fx ::query
+  [->gql]
+  (fn [{db :db} [_ input]]
+    (if (= input "")
+      {:db (assoc db :search {:query "" :suggestions []})}
+      {:db (assoc-in db [:search :query] input)
+       :gql {:query query-suggestions
+             :defs  {:query "String"}
+             :vars  {:query input}}})))
+
+(rf/reg-event-db ::query-success
+  (fn [db [_ _ res]]
+    (assoc-in db [:search :suggestions] (-> res :data :translations))))
+
+(rf/reg-event-db ::query-failure
+  (fn [db _]
+    (assoc db :flash [:error "Error fetching suggestions"])))
+
 ;; -- Compnents --------------------------------------------
 
+(defn suggestions []
+  (let [{:keys [query suggestions]} @(rf/subscribe [::sub/search])]
+    (when-not (empty? suggestions)
+     [:ul.suggestions
+       (for [sugg suggestions]
+         ^{:key (sugg :id)}
+         [:li
+          [:span.tag (->> sugg :language :code (str "@"))]
+          " "
+          (sugg :text)])
+       [:li
+        [:span.tag "Add phrase "]
+        query]])))
+
 (defn search-bar []
-  (let [data (r/atom {})]
-    [:form (style ::search-bar {:on-submit #(form/dispatch % [::submit @data])})
-      [form/formatted data :input {:placeholder "search..."}]]))
+  (let [focused? (r/atom false)]
+   (fn []
+    (let [{:keys [query]} @(rf/subscribe [::sub/search])
+          on-change #(rf/dispatch [::query (form/e-value %)])]
+      [:form (style ::search-bar {:on-submit #(form/just-dispatch % [::submit])})
+        [:input.search {:placeholder "search..."
+                        :value query
+                        :on-change on-change
+                        :on-focus #(reset! focused? true)
+                        :on-blur #(reset! focused? false)}]
+        (when @focused? [suggestions])]))))
+
 
 ;; -- Root -------------------------------------------------
 
 (defn root []
   (rf/dispatch [::fetch])
-  [ui/layout
-   [:section (style ::root)
-    (search-bar)]])
+  (fn []
+    [ui/layout
+     [:section (style ::root)
+      [search-bar]]]))
 
 ;; -- Styles -----------------------------------------------
 
@@ -61,14 +111,30 @@
                   :font :mono}])
 
 (defstyle ::search-bar
-  [".formatted" {:padding "12px 24px"
-                 :font :mono
-                 :background (v/color :field)
-                 :border :none
-                 :font-size "18px"
-                 :color (v/color :text)
-                 :width "100%"
-                 :box-sizing :border-box
-                 :border-radius (v/default :border-radius)}])
+  [".search" {:padding "12px 24px"
+              :font :mono
+              :background (v/color :field)
+              :border :none
+              :font-size "18px"
+              :color (v/color :text)
+              :width "100%"
+              :box-sizing :border-box
+              :border-radius (v/default :border-radius)
+              :transition "all 100ms ease-in"}
+   ["&:active" "&:focus" {:background (v/color :field-active)}]]
+  [".suggestions" {:list-style-type :none
+                   :background (v/color :field)
+                   :padding 0
+                   :margin 0
+                   :margin-top "12px"
+                   :border-radius (v/default :border-radius)
+                   :overflow :hidden}
+    ["li"         {:padding "12px 12px"
+                   :border-bottom (str "1px solid" (v/nord :black-))}
+     ["&:hover"   {:background (v/color :field-active)
+                   :cursor :pointer}]
+     [".tag"      {:color (v/color :bang)}]
+     ["&:last-child" {:border-bottom :none}]]])
+
 
 

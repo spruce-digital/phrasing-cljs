@@ -42,8 +42,9 @@
 
 (def color {:background (nord :black-)
             :border     (nord :black----)
-            :card       (nord :black--)
-            :field      (nord :black----)
+            :card       (nord :black----)
+            :field      (nord :black--)
+            :field-active (c/lighten (nord :black--) 5)
             :active     (nord :frost---)
             :icon       (nord :frost-)
             :label      (nord :frost)
