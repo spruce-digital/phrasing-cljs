@@ -15,12 +15,11 @@
   dispatching the provided event. Renders a custom footer at the bottom"
   [label event footer]
   (let [data (r/atom {})]
-   [:section (style ::form)
+   [:form (style ::form {:on-submit #(form/just-dispatch % [event @data])})
     [:h1 label]
     [form/text data :email]
     [form/pass data :password]
-    [:button {:type :submit
-              :on-click #(dispatch [event @data])}
+    [:button {:type :submit}
       label]
     footer]))
 

@@ -1,6 +1,7 @@
 (ns phrasing.pages.phrase
   (:require [reagent.core :as r]
             [re-frame.core :as rf]
+            [kee-frame.core :as k]
             [phrasing.gql :refer [->gql]]
             [phrasing.ui.css :refer [defstyle style]]
             [phrasing.ui.values :as v]
@@ -35,32 +36,66 @@
   (fn [db _]
     (assoc db :flash "Error fetching phrase")))
 
+(def query-create-phrase
+  "createPhrase(input: $input) {
+    id
+    translations {
+      text
+      language { code }
+    }
+  }")
+
+(rf/reg-event-fx ::create
+  [->gql]
+  (fn [cofx [_ data]]
+    (let [clean-data (->> data (map #(select-keys % [:text :code]))
+                               (remove empty?))]
+      {:gql {:query query-create-phrase
+             :defs  {:input "PhraseInput"}
+             :vars  {:input {:translations clean-data}}
+             :op    :mutation}})))
+
+(rf/reg-event-fx ::create-success
+  (fn [{db :db} _]
+    {:db (assoc db :flash [:success "Phrase successfully created"])
+     :navigate-to [:search]}))
+
+(rf/reg-event-db ::create-failure
+  (fn [db _]
+    (assoc db :flash [:error "Failed to create phrase"])))
+
 ;; -- Components -------------------------------------------
 
-(defn show-phrase [phrase editing?]
+(defn show-phrase [phrase on-edit]
   [:section (style ::phrase)
     [:div.title-bar
       [:h1 "Show Phrase"]
-      [:span.action {:on-click #(swap! editing? not)}
+      [:span.action {:on-click on-edit}
         "Edit Phrase"]]
     (when phrase
       (for [tr (phrase :translations)]
         ^{:key (tr :id)}
         [:div.tr [ui/translation tr]]))])
 
-(defn edit-phrase [phrase editing?]
-  [:section (style ::phrase)
-    [:div.title-bar
-      [:h1 "Edit Phrase"]
-      [:span.action {:on-click #(swap! editing? not)}
-        "Save"]]
-    [:p "Edit functionality coming soon!"]])
+(defn edit-phrase [phrase event-name]
+  (let [translations (r/atom (get phrase :translations []))]
+    (fn [_ _]
+      [:section (style ::phrase)
+        [:div.title-bar
+          [:h1 "Edit Phrase"]
+          [:span.action {:on-click #(rf/dispatch [event-name @translations])}
+            "Save"]]
+        (for [index (-> @translations count range)]
+          ^{:key index}
+          [form/tr translations index])
+        [:button.add-tr {:on-click #(swap! translations conj {})}
+          "Add Translation"]])))
 
 ;; -- Roots ------------------------------------------------
 
 (defn root-new []
   (let [phrase @(rf/subscribe [::sub/phrase :new])]
-    [:h1 "new-phrase"]))
+    [edit-phrase phrase ::create]))
 
 (defn root-existing [id]
   (rf/dispatch [::fetch id])
@@ -68,8 +103,8 @@
     (fn [id]
       (let [phrase @(rf/subscribe [::sub/phrase id])]
         (if @editing?
-          [edit-phrase phrase editing?]
-          [show-phrase phrase editing?])))))
+          [edit-phrase phrase ::update]
+          [show-phrase phrase #(swap! editing? not)])))))
 
 ;; -- Handler ----------------------------------------------
 ;;
@@ -110,5 +145,8 @@
                  :text-decoration :underline}]]]
 
   [".tr"  {:card :padded
-           :margin 0}])
+           :margin 0}]
+  [".add-tr"  {:button :action
+               :width "100%"}
+   ["&:hover" {:cursor :pointer}]])
 

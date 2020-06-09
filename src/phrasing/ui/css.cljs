@@ -43,7 +43,7 @@
                         :padding       "12px 24px"
                         :border-radius (v/default :border-radius)}
               :glass   {:background :none
-                        :color      (v/color :bang)}
+                        :color      (v/color :logo)}
               :action  {:background (v/color :logo)
                         :color      (v/color :background)}})
 
