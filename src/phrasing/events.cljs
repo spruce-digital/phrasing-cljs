@@ -4,6 +4,8 @@
             [phrasing.db :refer [update-ls]]
             [kee-frame.core :as kee]))
 
+;; -- Initialization ---------------------------------------
+
 (reg-event-fx ::init
   [(inject-cofx :load-ls)]
   (fn [{:keys [db ls]}]
@@ -13,12 +15,16 @@
   [update-ls]
   (fn [db _] db))
 
+;; -- Sign out ---------------------------------------------
+
 (reg-event-fx ::sign-out
   (fn [{db :db} _]
     {:db (-> db (dissoc :auth)
                 (assoc :flash [:success "Sign out successful"]))
      :navigate-to [:home]
      :dispatch [::save-to-ls]}))
+
+;; -- Sign in ----------------------------------------------
 
 (def query-sign-in "
   signIn(input: $input) {
@@ -46,6 +52,8 @@
      :navigate-to [:search]
      :dispatch [::save-to-ls]}))
 
+;; -- Sign up ----------------------------------------------
+
 (def query-sign-up "
   signUp(input: $input) {
     token
@@ -72,3 +80,9 @@
      :navigate-to [:search]
      :dispatch [::save-to-ls]}))
 
+;; -- Suggestions ------------------------------------------
+
+(reg-event-fx ::new-phrase-from-search
+  (fn [{db :db} [_ input]]
+    {:db (assoc db :new-phrase {:translations [{:input input}]})
+     :navigate-to [:phrase {:id "new"}]}))

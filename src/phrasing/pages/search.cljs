@@ -7,6 +7,7 @@
             [phrasing.ui.form :as form]
             [phrasing.gql :refer [->gql]]
             [phrasing.subs :as sub]
+            [phrasing.events :as e]
             [cljs.pprint :refer [pprint]]
             [ajax.core :as ajax]
             [re-frame.core :as rf]))
@@ -72,14 +73,15 @@
 
 (defn suggestions []
   (let [{:keys [query suggestions]} @(rf/subscribe [::sub/search])]
-    (when-not (empty? suggestions)
-     [:ul.suggestions
+   [:ul.suggestions
+     (when-not (empty? suggestions)
        (for [sugg suggestions]
          ^{:key (sugg :id)}
-         [ui/translation :li sugg])
-       [:li
+         [ui/translation :li sugg]))
+     (when-not (empty? query)
+       [:li {:on-click #(rf/dispatch [::e/new-phrase-from-search query])}
         [:span.tag "Add phrase "]
-        query]])))
+        query])]))
 
 (defn search-bar []
   (let [focused? (r/atom false)]
@@ -91,7 +93,7 @@
                         :value query
                         :on-change on-change
                         :on-focus #(reset! focused? true)
-                        :on-blur #(reset! focused? false)}]
+                        :on-blur (fn [_] (js/setTimeout #(reset! focused? false) 200))}]
         (when @focused? [suggestions])]))))
 
 (defn phrase-card [phrase]

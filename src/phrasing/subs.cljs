@@ -32,7 +32,7 @@
 
 (reg-sub ::phrase
  (fn [db [_ id]]
-  (if (= id "new")
+  (if (= id :new)
     (db :new-phrase)
     (get-in db [:phrases id]))))
 
