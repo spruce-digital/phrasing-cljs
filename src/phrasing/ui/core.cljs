@@ -24,17 +24,21 @@
   (let [is-authed? @(rf/subscribe [::subs/is-authed?])
         route-key @(rf/subscribe [::subs/route-key])
         logo-href (k/path-for [(if is-authed? :search :home)])]
+
     [:section (style ::navigation)
      [:span.title
       [:a.logo {:href logo-href} "Phrasing.app"]]
      (if is-authed?
-       [:ul.registration
-        (if (= route-key :home)
+       (if (= route-key :home)
+         [:ul.actions
           [:a {:href (k/path-for [:search])}
-           [:button.go-to-app "Go to app ➜"]]
+           [:button.go-to-app "Go to app ➜"]]]
+         [:ul.actions
+          [:a {:href (k/path-for [:library])}
+           [:button.library "Library"]]
           [:a {:href "#"}
-           [:button.sign-out {:on-click #(rf/dispatch [::e/sign-out])} "Sign Out"]])]
-       [:ul.registration
+           [:button.sign-out {:on-click #(rf/dispatch [::e/sign-out])} "Sign Out"]]])
+       [:ul.actions
         [:a {:href "/signin"}
          [:button.sign-in "Sign In"]]
         [:a {:href "/signup"}
@@ -52,14 +56,11 @@
              :font-size     "36px"
              :font          :archer}]
   [".logo"  {::css/snippets [:link]}]
-  [".sign-out" {:button :glass}
-   ["&:hover"  {:cursor :pointer}]]
-  [".sign-in" {:button :glass}
-   ["&:hover" {:cursor :pointer}]]
-  [".sign-up" {:button :action}
-   ["&:hover" {:cursor :pointer}]]
-  [".go-to-app" {:button :glass}
-   ["&:hover"   {:cursor :pointer}]])
+  [".actions"  {}
+   ["button"   {:button :glass}
+    ["&:hover" {:cursor :pointer}]]]
+  [".sign-up"  {:button :action}
+   ["&:hover"  {:cursor :pointer}]])
 
 ;; -- Flash ------------------------------------------------
 
