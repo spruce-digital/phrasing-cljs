@@ -36,3 +36,6 @@
     (db :new-phrase)
     (get-in db [:phrases id]))))
 
+(reg-sub ::dialogues
+ (fn [db _]
+  (get db :dialogues [])))

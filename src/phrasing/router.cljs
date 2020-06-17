@@ -4,7 +4,8 @@
             [phrasing.pages.search :as search]
             [phrasing.pages.registration :as reg]
             [phrasing.pages.home :as home]
-            [phrasing.pages.phrase :as phrase]))
+            [phrasing.pages.phrase :as phrase]
+            [phrasing.pages.library :as library]))
 
 (def routes
   [["/" :home]
@@ -24,4 +25,5 @@
    :sign-in [reg/root-sign-in]
    :sign-up [reg/root-sign-up]
    :phrase [phrase/handler]
+   :library [library/root]
    nil [:div "Loading..."]])
