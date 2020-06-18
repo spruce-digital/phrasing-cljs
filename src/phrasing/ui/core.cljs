@@ -18,6 +18,55 @@
   ["a" {:text-decoration :none
         :color (v/color :link)}])
 
+;; -- Detail -----------------------------------------------
+
+(defn detail-item-visual
+  "A visual to represent the detail-item places alongside the
+  main info"
+  [image-or-icon]
+  [:div {:style {:width :30px :height :30px :border-radius :15px :background :blue}}])
+
+(defn detail-item-info
+  "An icon/value pair to be rendered within the info of a detail item"
+  [icon value]
+  [:div.item-info-pair
+   [:i {:class (str "far fa-" (name icon))}]
+   [:span value]])
+
+(defn detail-item
+  "A row to be rendered within a detail component. Accepts many
+  standard varaibles and lays them out appropriately"
+  [{:keys [title image image-ratio icon language listens]}]
+  [:article.item
+   (when (or image icon)
+    [detail-item-visual (or image icon)])
+   [:main.rows
+    [:div.top-row
+     [:h4 title]]
+    [:div.bottom-row
+     (when language [:span.code (str "@" language)])
+     (when listens [detail-item-info :headphones-alt listens])]]])
+
+
+(defn detail
+  "Renders a component that contains a title and action button
+  followed by a list of clickable items."
+  [{:keys [title action-icon action items]}]
+  [:section (style ::detail)
+   [:header
+    [:h3 title]
+    [:i {:class (str "far fa-" (name action-icon))}]]
+   [:main
+    (for [item items]
+     [detail-item item])]])
+
+(defstyle ::detail
+  ["&"      {}]
+  ["header" {:display :flex
+             :flex-direction :row
+             :justify-content :space-between
+             :align-items :center}])
+
 ;; -- Navigation -------------------------------------------
 
 (defn navigation []

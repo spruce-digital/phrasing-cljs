@@ -6,23 +6,19 @@
             [phrasing.ui.css :refer [defstyle style]]
             [phrasing.subs :as subs]))
 
-;; -- Components
+;; -- Components -------------------------------------------
 
 (defn dialogues []
-  (let [dialogues @(rf/subscribe [::subs/dialogues])]
+  (let [dialogues @(rf/subscribe [::subs/dialogues])
+        items     [{:icon :dog
+                    :title "About my dog"
+                    :language :fr
+                    :listens 20}]]
     [:section (style ::dialogues)
-     [:div.title-bar
-      [:h2 "Dialogues"]
-      [:span "Add new"]]
-     [:ul.dialogue-list
-      (if (empty? dialogues)
-        [:div.empty-message
-         [:h3 "No dialogues found"]
-         [:div "Create a dialogue by clicking the plus sign in the top right"]]
-        (for [dialogue dialogues]
-          [:li.dialogue
-           [:div "icon"]
-           [:div "title"]]))]]))
+     [ui/detail {:title "Dialogues"
+                 :action-icon :plus
+                 :action #(js/alert "new")
+                 :items items}]]))
 
 
 ;; -- Root Component ---------------------------------------
